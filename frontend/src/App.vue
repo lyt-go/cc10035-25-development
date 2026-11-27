@@ -6,6 +6,9 @@
         <RouterLink v-for="item in navItems" :key="item.path" :to="item.path" class="nav-item">
           {{ item.label }}
         </RouterLink>
+        <RouterLink to="/site-attribution" class="nav-item" data-testid="nav-site-attribution">
+          报文归属确认
+        </RouterLink>
       </nav>
     </aside>
     <main class="app-main">

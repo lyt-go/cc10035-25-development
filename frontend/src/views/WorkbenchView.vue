@@ -22,6 +22,8 @@
       </article>
     </div>
 
+    <SiteConflictPanel v-if="siteConflictRelevant" :module-key="meta.key" @conflicts="onConflicts" />
+
     <p class="status-legend">
       <span v-for="item in statusSummary" :key="item.status" class="legend-item">
         {{ item.status }}：{{ item.count }}
@@ -40,7 +42,15 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th v-for="column in meta.fields" :key="column">{{ column }}</th>
+          <th
+            v-for="column in meta.fields"
+            :key="column"
+            :class="{ 'conflict-column': conflictFields.includes(column) }"
+            :data-conflict="conflictFields.includes(column) ? 'true' : 'false'"
+          >
+            {{ column }}
+            <span v-if="conflictFields.includes(column)" class="conflict-tag">站点冲突</span>
+          </th>
           <th>当前状态</th>
           <th>可执行动作</th>
         </tr>
@@ -104,9 +114,17 @@ import {
   runAction as applyAction,
 } from '@/api/backend-service'
 import type { EntryRow } from '@/data/types'
+import SiteConflictPanel from '@/views/SiteConflictPanel.vue'
 
 const props = defineProps<{ moduleKey: string }>()
 const meta = moduleMeta(props.moduleKey)
+// 解码与路由会消费站点规则，冲突时要在这里给出查证入口。
+const siteConflictRelevant = ['msg_decode', 'msg_router'].includes(meta.key)
+const conflictFields = ref<string[]>([])
+
+function onConflicts(fields: string[]) {
+  conflictFields.value = fields
+}
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
 const errorMessage = ref('')
